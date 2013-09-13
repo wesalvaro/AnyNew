@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html ng-app="any" ng-csp>
+  <head>
+    <script src="angular.min.js"></script>
+    <script src="angular-animate.min.js"></script>
+    <script src="any.js"></script>
+    <title>Any New Tab</title>
+    <link rel="stylesheet" href="any.css">
+  </head>
+  <body>
+    <div ng-controller="TasksCtrl" ng-show="loaded">
+      <div class="done" ng-if="!tasks.length">
+        <h1>All done! Seriously?</h1>
+        <img src="Hand-Sign-07-128.png" />
+      </div>
+      <ol class="tasks">
+        <li class="task" ng-animate="'animate'"
+            ng-hide="task.parentGlobalTaskId"
+            ng-repeat="task in tasks|orderBy:'dueDate'"
+            ng-class="{checked: task.status == 'CHECKED',
+                       priority: task.priority == 'High'}">
+          {{ task.title }}
+        </li>
+      </ol>
+    </div>
+    <div ng-controller="ConfigCtrl" class="configuration">
+      <form ng-submit="login()" ng-show="shown">
+        <input ng-model="config.email" type="email" />
+        <input ng-model="config.password" type="password" />
+        <button>login</button>
+      </form>
+      <button ng-click="shown = !shown">toggle</button>
+    </div>
+  </body>
+</html>

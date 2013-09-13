@@ -1,0 +1,12 @@
+{
+  "name": "Any.do new tab page",
+  "version": "0.2.2",
+  "incognito": "split",
+  "chrome_url_overrides": {
+    "newtab": "any.html"
+  },
+  "permissions": [
+    "https://sm-prod.any.do/*"
+  ],
+  "manifest_version": 2
+}

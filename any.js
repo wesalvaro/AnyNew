@@ -49,11 +49,11 @@ any.controller('TasksCtrl', any.TasksCtrl);
 /**
  * Controls login information.
  */
-any.ConfigCtrl = function($scope, $window, Config, Any) {
+any.ConfigCtrl = function($scope, $window, Config, User) {
   $scope.config = Config;
   $scope.login = function() {
     Config.save();
-    Any.login().then(function() {
+    User.login(email, password).then(function() {
       $window.location.reload();
     });
   }
@@ -109,7 +109,13 @@ any.User = function($resource, Config) {
 any.service('User', any.User);
 
 
-any.User.prototype.login = function() {
+any.User.prototype.login = function(email, password) {
+  if (email && password) {
+    this.me = new User({
+      email: email,
+      password: password
+    });
+  }
   return this.me.$login(function(user) {
     user.loggedIn = true;
     user.$get().then(function() {

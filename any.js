@@ -53,7 +53,7 @@ any.ConfigCtrl = function($scope, $window, Config, User) {
   $scope.config = Config;
   $scope.login = function() {
     Config.save();
-    User.login(email, password).then(function() {
+    User.login($scope.config).then(function() {
       $window.location.reload();
     });
   }
@@ -109,12 +109,9 @@ any.User = function($resource, Config) {
 any.service('User', any.User);
 
 
-any.User.prototype.login = function(email, password) {
-  if (email && password) {
-    this.me = new User({
-      email: email,
-      password: password
-    });
+any.User.prototype.login = function(config) {
+  if (config) {
+    this.me = new User(config);
   }
   return this.me.$login(function(user) {
     user.loggedIn = true;

@@ -34,11 +34,13 @@ any.controller('TasksCtrl', any.TasksCtrl);
 /**
  * Controls login information.
  */
-any.ConfigCtrl = function($scope, Config, Any) {
+any.ConfigCtrl = function($scope, $window, Config, Any) {
   $scope.config = Config;
   $scope.login = function() {
     Config.save();
-    Any.login();
+    Any.login().then(function() {
+      $window.location.reload();
+    });
   }
 };
 any.controller('ConfigCtrl', any.ConfigCtrl);

@@ -6,7 +6,7 @@ TODO: Display due date.
 TODO: Fix animation?
 */
 
-var any = angular.module('any', []);
+var any = angular.module('any', ['ngAnimate', 'ngResource']);
 any.SERVER = 'https://sm-prod.any.do'
 any.LOGIN_URL = any.SERVER + '/j_spring_security_check';
 any.TASKS_URL = any.SERVER + '/me/tasks';

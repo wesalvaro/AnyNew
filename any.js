@@ -1,5 +1,4 @@
 /*
-TODO: Use Angular Resource.
 TODO: Group with subtasks.
 TODO: Allow task editing [checking, deleting].
 TODO: Display due date.
@@ -9,6 +8,7 @@ TODO: Fix animation?
 var any = angular.module('any', ['ngAnimate', 'ngResource']);
 any.SERVER = 'https://sm-prod.any.do'
 any.LOGIN_URL = any.SERVER + '/j_spring_security_check';
+any.USER_URL = any.SERVER + '/me';
 any.TASKS_URL = any.SERVER + '/me/tasks';
 any.TASK_URL = any.SERVER + '/me/tasks/';
 any.TASK_PARAMS = '?responseType=flat&includeDeleted=false&includeDone=false';
@@ -35,7 +35,11 @@ any.TasksCtrl = function($scope, Any) {
     $scope.loaded = true;
   });
   $scope.toggleDone = function(task) {
-    Any.markDone(task.globalTaskId, !any.isTaskDone(task));
+    if (any.isTaskDone(task)) {
+      task.$uncheck();
+    } else {
+      task.$check();
+    }
   };
 };
 any.controller('TasksCtrl', any.TasksCtrl);
@@ -78,65 +82,84 @@ any.Config.prototype.save = function() {
 /**
  * Interacts with the Any.Do API server.
  */
-any.Any = function($http, $q, Config) {
+any.Any = function($http, $q, $resource, Config) {
   this.http = $http;
   this.q = $q;
   this.config = Config;
   this.tasks = null;
   this.tasksById = {};
+  this.Task = $resource(any.TASK_URL + ':id', {
+    id: '@globalTaskId',
+    responseType: 'flat',
+    includeDeleted: false,
+    includeDone: false
+  }, {
+    save: {method: 'PUT'},
+    check: {
+      method: 'PUT',
+      transformRequest: function(task) {
+        task.status = any.Status.DONE;
+        return angular.toJson(task);
+      }
+    },
+    uncheck: {
+      method: 'PUT',
+      transformRequest: function(task) {
+        task.status = any.Status.NOT_DONE;
+        return angular.toJson(task);
+      }
+    }
+  });
+  var User = $resource(any.USER_URL, {}, {
+    get: {
+      method: 'GET',
+      params: {}
+    },
+    login: {
+      method: 'POST',
+      url: any.LOGIN_URL,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      params: {
+        j_username: '@email',
+        j_password: '@password',
+        _spring_security_remember_me: 'on'
+      }
+    }
+  });
+  this.user = new User({email: this.config.email, password: this.config.password});
 };
 any.service('Any', any.Any);
 
 
 any.Any.prototype.login = function() {
-  if (this.loggedIn) {
-    return this.q.when(true);
-  }
-  var data = ('j_username=' + this.config.email +
-              '&j_password=' + this.config.password +
-              '&_spring_security_remember_me=on');
-  var self = this;
-  return this.http({
-    url: any.LOGIN_URL,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    data: data
-  }).then(function() {
-    self.loggedIn = true;
-    return true;
+  return this.user.$login(function(user) {
+    user.loggedIn = true;
+    user.$get().then(function() {
+      console.log(user);
+    });
   });
-
-};
-
-
-any.Any.prototype.markDone = function(globalTaskId, done) {
-  done = angular.isDefined(done) ? done : true;
-  var url = any.TASK_URL + globalTaskId + any.TASK_PARAMS;
-  var task = this.tasksById[globalTaskId];
-  task.status = done ? 'CHECKED' : 'UNCHECKED';
-  return this.http.put(url, task);
 };
 
 
 any.Any.prototype.refreshTasks = function() {
-  var url = any.TASKS_URL + any.TASK_PARAMS;
+  this.tasks = this.Task.query();
   var self = this;
-  return this.tasks = this.http.get(url).then(function(data) {
-    angular.forEach(data.data, function(task) {
+  return this.tasks.$promise.then(function(tasks) {
+    angular.forEach(tasks, function(task) {
       self.tasksById[task.globalTaskId] = task;
     });
-    return data.data;
+    return tasks;
   }, function() {
+    // Failed: login and try again.
     return self.login().then(function() {
       return self.refreshTasks();
-    })
+    });
   });
 };
 
 
 any.Any.prototype.getTasks = function() {
-  if (this.tasks) {
-    return this.tasks;
-  }
-  return this.refreshTasks();
+  return this.tasks || this.refreshTasks();
 };

@@ -14,6 +14,17 @@ any.TASK_URL = any.SERVER + '/me/tasks/';
 any.TASK_PARAMS = '?responseType=flat&includeDeleted=false&includeDone=false';
 
 
+any.Status = {
+  DONE: 'CHECKED',
+  NOT_DONE: 'UNCHECKED'
+};
+
+
+any.isTaskDone = function(task) {
+  return task.status == any.Status.DONE;
+};
+
+
 
 /**
  * Controls listing and marking tasks.
@@ -23,8 +34,8 @@ any.TasksCtrl = function($scope, Any) {
   $scope.tasks.then(function() {
     $scope.loaded = true;
   });
-  $scope.markDone = function(task) {
-    Any.markDone(task.globalTaskId);
+  $scope.toggleDone = function(task) {
+    Any.markDone(task.globalTaskId, !any.isTaskDone(task));
   };
 };
 any.controller('TasksCtrl', any.TasksCtrl);

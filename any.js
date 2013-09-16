@@ -113,6 +113,10 @@ any.Any.prototype.refreshTasks = function() {
       self.tasksById[task.globalTaskId] = task;
     });
     return data.data;
+  }, function() {
+    return self.login().then(function() {
+      return self.refreshTasks();
+    })
   });
 };
 
@@ -121,8 +125,5 @@ any.Any.prototype.getTasks = function() {
   if (this.tasks) {
     return this.tasks;
   }
-  var self = this;
-  return this.login().then(function() {
-    return self.refreshTasks();
-  });
+  return this.refreshTasks();
 };

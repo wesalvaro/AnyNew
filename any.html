@@ -15,7 +15,7 @@
       </div>
       <ol class="tasks">
         <li class="task" ng-animate="'animate'"
-            ng-click="markDone(task.globalTaskId)"
+            ng-click="markDone(task)"
             ng-hide="task.parentGlobalTaskId"
             ng-repeat="task in tasks|filter:search|orderBy:'dueDate'"
             ng-class="{checked: task.status == 'CHECKED',

@@ -23,8 +23,8 @@ any.TasksCtrl = function($scope, Any) {
   $scope.tasks.then(function() {
     $scope.loaded = true;
   });
-  $scope.markDone = function(gId) {
-    Any.markDone(gId);
+  $scope.markDone = function(task) {
+    Any.markDone(task.globalTaskId);
   };
 };
 any.controller('TasksCtrl', any.TasksCtrl);

@@ -17,11 +17,12 @@
         <li class="task" ng-animate="'animate'"
             ng-click="markDone(task.globalTaskId)"
             ng-hide="task.parentGlobalTaskId"
-            ng-repeat="task in tasks|orderBy:'dueDate'"
+            ng-repeat="task in tasks|filter:search|orderBy:'dueDate'"
             ng-class="{checked: task.status == 'CHECKED',
                        priority: task.priority == 'High'}">
-          {{ task.title }}
-        </li>
+           {{ task.title }}
+         </li>
+         <input type="search" ng-model="search.title" />
       </ol>
     </div>
     <div ng-controller="ConfigCtrl" class="configuration">

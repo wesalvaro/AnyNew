@@ -80,12 +80,51 @@ any.Config.prototype.save = function() {
 
 
 /**
- * Interacts with the Any.Do API server.
+ * User interface for the Any.Do API server.
  */
-any.Any = function($http, $q, $resource, Config) {
-  this.http = $http;
-  this.q = $q;
-  this.config = Config;
+any.User = function($resource, Config) {
+  var User = $resource(any.USER_URL, {}, {
+    get: {
+      method: 'GET',
+      params: {}
+    },
+    login: {
+      method: 'POST',
+      url: any.LOGIN_URL,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      params: {
+        j_username: '@email',
+        j_password: '@password',
+        _spring_security_remember_me: 'on'
+      }
+    }
+  });
+  this.me = new User({
+    email: Config.email,
+    password: Config.password
+  });
+};
+any.service('User', any.User);
+
+
+any.User.prototype.login = function() {
+  return this.me.$login(function(user) {
+    user.loggedIn = true;
+    user.$get().then(function() {
+      console.log(user);
+    });
+  });
+};
+
+
+
+/**
+ * Task interface for the Any.Do API server.
+ */
+any.Any = function($resource, User) {
+  this.user = User;
   this.tasks = null;
   this.tasksById = {};
   this.Task = $resource(any.TASK_URL + ':id', {
@@ -110,37 +149,8 @@ any.Any = function($http, $q, $resource, Config) {
       }
     }
   });
-  var User = $resource(any.USER_URL, {}, {
-    get: {
-      method: 'GET',
-      params: {}
-    },
-    login: {
-      method: 'POST',
-      url: any.LOGIN_URL,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      params: {
-        j_username: '@email',
-        j_password: '@password',
-        _spring_security_remember_me: 'on'
-      }
-    }
-  });
-  this.user = new User({email: this.config.email, password: this.config.password});
 };
 any.service('Any', any.Any);
-
-
-any.Any.prototype.login = function() {
-  return this.user.$login(function(user) {
-    user.loggedIn = true;
-    user.$get().then(function() {
-      console.log(user);
-    });
-  });
-};
 
 
 any.Any.prototype.refreshTasks = function() {
@@ -153,7 +163,7 @@ any.Any.prototype.refreshTasks = function() {
     return tasks;
   }, function() {
     // Failed: login and try again.
-    return self.login().then(function() {
+    return self.user.login().then(function() {
       return self.refreshTasks();
     });
   });

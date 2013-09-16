@@ -1,6 +1,6 @@
 {
   "name": "Any.do new tab page",
-  "version": "0.3",
+  "version": "0.3.001",
   "incognito": "split",
   "chrome_url_overrides": {
     "newtab": "any.html"

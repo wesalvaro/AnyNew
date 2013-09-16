@@ -83,7 +83,7 @@ any.Config.prototype.save = function() {
  * User interface for the Any.Do API server.
  */
 any.User = function($resource, Config) {
-  var User = $resource(any.USER_URL, {}, {
+  this.User = $resource(any.USER_URL, {}, {
     get: {
       method: 'GET',
       params: {}
@@ -101,7 +101,7 @@ any.User = function($resource, Config) {
       }
     }
   });
-  this.me = new User({
+  this.me = new this.User({
     email: Config.email,
     password: Config.password
   });
@@ -111,7 +111,7 @@ any.service('User', any.User);
 
 any.User.prototype.login = function(config) {
   if (config) {
-    this.me = new User(config);
+    this.me = new this.User(config);
   }
   return this.me.$login(function(user) {
     user.loggedIn = true;

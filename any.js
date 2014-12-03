@@ -5,7 +5,7 @@ TODO: Display due date.
 TODO: Fix animation?
 */
 
-var any = angular.module('any', ['ngAnimate', 'ngResource']);
+var any = angular.module('any', ['ngResource']);
 any.SERVER = 'https://sm-prod.any.do'
 any.LOGIN_URL = any.SERVER + '/j_spring_security_check';
 any.USER_URL = any.SERVER + '/me';
@@ -29,36 +29,73 @@ any.isTaskDone = function(task) {
 /**
  * Controls listing and marking tasks.
  */
-any.TasksCtrl = function($scope, Any) {
-  $scope.tasks = Any.getTasks();
-  $scope.tasks.then(function() {
-    $scope.loaded = true;
-  });
-  $scope.toggleDone = function(task) {
-    if (any.isTaskDone(task)) {
-      task.$uncheck();
-    } else {
-      task.$check();
+any.Do = function(Any) {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {},
+    templateUrl: 'do.html',
+    link: function($scope) {
+      Any.getTasks().then(function(tasks) {
+        $scope.loaded = true;
+        $scope.tasks = tasks;
+      });
     }
   };
 };
-any.controller('TasksCtrl', any.TasksCtrl);
+any.directive('anyDo', any.Do);
+
+
+
+any.Task = function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'task.html',
+    replace: true,
+    scope: {
+      task: '=value'
+    },
+    link: function($scope) {
+      $scope.$watch('task.status', function(status) {
+        $scope.done = status == 'CHECKED';
+      });
+      $scope.$watch('task.priority', function(priority) {
+        $scope.priority = priority == 'High';
+      });
+      $scope.toggleDone = function(task) {
+        if (any.isTaskDone(task)) {
+          task.$uncheck();
+        } else {
+          task.$check();
+        }
+      };
+    }
+  };
+};
+any.directive('task', any.Task);
 
 
 
 /**
  * Controls login information.
  */
-any.ConfigCtrl = function($scope, $window, Config, User) {
-  $scope.config = Config;
-  $scope.login = function() {
-    Config.save();
-    User.login($scope.config).then(function() {
-      $window.location.reload();
-    });
-  }
+any.Config = function($window, Config, User) {
+  return {
+    restrict: 'E',
+    templateUrl: 'config.html',
+    scope: {},
+    link: function($scope) {
+      $scope.config = Config;
+      $scope.login = function() {
+        Config.save();
+        User.login($scope.config).then(function() {
+          $window.location.reload();
+        });
+      };
+    }
+  };
 };
-any.controller('ConfigCtrl', any.ConfigCtrl);
+any.directive('config', any.Config);
 
 
 

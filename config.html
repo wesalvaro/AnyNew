@@ -1,0 +1,20 @@
+<div class="ui right floated inverted compact basic segment">
+  <form class="ui small form segment" ng-submit="login()" ng-show="shown">
+    <div class="two fields">
+      <div class="field">
+        <input placeholder="email@ddress.com" type="email" ng-model="config.email">
+      </div>
+      <div class="field">
+        <input placeholder="password" type="password" ng-model="config.password">
+      </div>
+    </div>
+    <div class="ui buttons">
+      <button class="ui button" type="button" ng-click="shown = !shown">Cancel</button>
+      <div class="or"></div>
+      <button class="ui positive button">Save</button>
+    </div>
+  </form>
+  <button class="ui tiny inverted basic button" ng-click="shown = !shown" ng-show="!shown">
+    <i class="privacy icon"></i>Settings
+  </button>
+</div>

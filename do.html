@@ -1,0 +1,11 @@
+<div class="ui inverted basic segment" ng-show="loaded">
+  <h1 class="ui center aligned icon header" ng-if="!tasks.length">
+    <i class="green checkmark icon"></i>
+    <div class="content">Done.</div>
+  </h1>
+  <div class="ui fluid icon input" ng-show="tasks.length">
+    <input type="search" placeholder="Filter..." ng-model="search.title">
+    <i class="search icon"></i>
+  </div>
+  <task ng-repeat="task in tasks|filter:search|orderBy:'dueDate'" value="task"></task>
+</div>

@@ -1,0 +1,11 @@
+<h2 class="ui huge header"
+    ng-class="{disabled: done, green: done}"
+    ng-hide="task.parentGlobalTaskId"
+    ng-click="toggleDone(task)">
+  <i class="blue pointing right icon" ng-show="!done && !priority"></i>
+  <i class="red warning sign icon" ng-show="!done && priority"></i>
+  <i class="green thumbs up outline icon" ng-show="done"></i>
+  <div class="content">
+    {{ task.title }}
+  </div>
+</h2>
